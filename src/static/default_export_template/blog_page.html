@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="{{.Desc}} {{.GlobalDesc}}">
+	<meta name="keywords" content="{{.Tags}} {{.GlobalTags}}">
+	<meta charset="UTF-8" />
+	<title>{{.Title}}</title>
+	<link rel="icon" type="image/x-icon" href="./assets/template_icon.svg" />
+	<link rel="stylesheet" type="text/css" href="./assets/template_main.css" />
+</head>
+<body>
+
+<div class="container">
+	<div class="header">
+		<div class="headerlinks">
+			<a href="index.html">Home</a>
+			<a href="blog_index.html">Index</a>
+		</div>
+		<h1 class="title">{{.Title}}</h1>
+		<i class="created">{{.Created}}</i> <i class="updated">{{.Updated}}</i>
+	</div>
+
+	<div class="body">
+{{.Content}}
+	</div>
+
+	<div class="footer">
+		Blog generated with <a href="https://github.com/aghouri/burlough">burlough</a>.
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="{{.Desc}}">
+	<meta name="keywords" content="{{.Tags}}">
+	<meta charset="UTF-8" />
+	<title>Your Blog</title>
+	<link rel="icon" type="image/x-icon" href="./assets/template_icon.svg" />
+	<link rel="stylesheet" type="text/css" href="./assets/template_main.css" />
+</head>
+<body>
+
+<div class="container">
+	<div class="header">
+		<div class="headerlinks">
+			<a href="blog_index.html">Index</a>
+		</div>
+		<h1 class="title">{{.Title}}</h1>
+	</div>
+
+	<div class="body">
+	<p>
+		{{.Desc}}
+	</p>
+	<h2>Recent Posts</h2>
+	{{range $index, $file := .Entries}}
+		<div class="post_entry">
+			<a href="{{$file.URL}}">{{$file.Title}}</a>
+		</div>
+	{{end}}
+	</div>
+
+	<div class="footer">
+		Blog generated with <a href="https://github.com/aghouri/burlough">burlough</a>.
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+hr {
+	border: none;
+	border-top: 1px solid #DEDEDE;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+a {
+	color: #005CB2;
+	text-decoration: none;
+}
+
+.container {
+	max-width: 800px;
+	margin: auto;
+	line-height: 1.8;
+	text-align: justify;
+	font-weight: 200;
+	font-family: Calibri, Noto Sans, Sans-Serif;
+	padding: 10px;
+}
+
+.footer {
+	text-align: right;
+	font-size: small;
+	color: grey;
+	margin-top: 30px;
+}
+
+.headerlinks {
+	display: flex;
+	gap: 20px;
+}
+
+.headerlinks a {
+	display: inline-block;
+}
