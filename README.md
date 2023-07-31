@@ -1,6 +1,6 @@
 **Warning: Initial testing is still incomplete.**
 
-![Burlough](./doc/logo.svg)
+<img src="./doc/logo.svg" alt="Burlough" />
 
 Burlough is yet another static blog generator that processes Markdown files
 into HTML pages. Rendered blogs can be put as-is into static webpage hosting
