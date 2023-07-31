@@ -44,7 +44,6 @@ func ParseBlogFile(src []byte) (blog.BlogFileContents, bool, error) {
 
 	if metadata != nil {
 		if err := metadata.Decode(&parseResult); err != nil {
-			util.Error(err)
 			return parseResult, noMetadata, err
 		}
 	} else {

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aghorui/burlough/util"
 	"github.com/otiai10/copy"
 )
 
@@ -86,7 +87,7 @@ func (b BlogTemplate) CopyAssetsToFolder(dest string) error {
 
 	err := os.MkdirAll(finalDest, 0755)
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	// This is a weird thing. I have to explicitly set the permissions of the
@@ -98,7 +99,7 @@ func (b BlogTemplate) CopyAssetsToFolder(dest string) error {
 	})
 
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	return nil
@@ -108,26 +109,25 @@ func LoadTemplate(folder fs.FS) (BlogTemplate, error) {
 	var t BlogTemplate
 	var err error
 
-	assetDir, err := fs.Sub(folder, "assets")
-	t.TemplateFS = &assetDir
+	t.TemplateFS = &folder
 
 	if err != nil {
-		return t, err
+		return t, util.Error(err)
 	}
 
 	t.FrontPage, err = template.New(FrontPageTemplateFileName).ParseFS(folder, FrontPageTemplateFileName)
 	if err != nil {
-		return t, err
+		return t, util.Error(err)
 	}
 
 	t.BlogPage, err = template.New(BlogPageTemplateFileName).ParseFS(folder, BlogPageTemplateFileName)
 	if err != nil {
-		return t, err
+		return t, util.Error(err)
 	}
 
 	t.IndexPage, err = template.New(IndexPageTemplateFileName).ParseFS(folder, IndexPageTemplateFileName)
 	if err != nil {
-		return t, err
+		return t, util.Error(err)
 	}
 
 	return t, nil
@@ -153,8 +153,8 @@ func PrepareBlogTemplateEntry(b BlogFile, finalPath string, globalDesc string, g
 		GlobalDesc: globalDesc,
 		Tags: b.Tags,
 		GlobalTags: globalTags,
-		Created: b.Created.String(),
-		Updated: b.Updated.String(),
+		Created: util.GetStandardTimestampString(b.Created),
+		Updated: util.GetStandardTimestampString(b.Updated),
 		URL: filepath.Join("./", finalPath),
 		Content: b.Content,
 	}

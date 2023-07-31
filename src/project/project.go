@@ -26,6 +26,11 @@ const hashingBufferSize = 2048
 
 var ErrNoConfigFileFound = fmt.Errorf("Config file not found in base path.")
 
+
+func ErrFileAlreadyExists(filePath string) error {
+	return fmt.Errorf("File already exists: %v\n", filePath);
+}
+
 // State of a given blog project.
 type ProjectState struct {
 	BasePath string            // Path to the base folder of the project.
@@ -44,7 +49,7 @@ func getHash(file *os.File) (blog.FileHash, error) {
 
 		if err != nil {
 			if err != io.EOF {
-				return blog.FileHash(""), err
+				return blog.FileHash(""), util.Error(err)
 			} else {
 				break;
 			}
@@ -76,12 +81,12 @@ func scanBlogFiles(files []fs.DirEntry, useFileTimestampAsCreationDate bool) ([]
 
 		fh, err := os.Open(file.Name())
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, util.Error(err)
 		}
 
 		filehash, err := getHash(fh)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, util.Error(err)
 		}
 
 		var createdTime time.Time
@@ -90,7 +95,7 @@ func scanBlogFiles(files []fs.DirEntry, useFileTimestampAsCreationDate bool) ([]
 			info, err := file.Info()
 
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, util.Error(err)
 			}
 
 			createdTime = info.ModTime().UTC()
@@ -105,12 +110,9 @@ func scanBlogFiles(files []fs.DirEntry, useFileTimestampAsCreationDate bool) ([]
 			Created: createdTime,
 		})
 
-		metaMap[file.Name()] = len(projectFiles) - 1;
+		metaMap[file.Name()] = len(projectFiles) - 1
 	}
 
-	// We're putting the responsibility of having the metadata sorted in this
-	// function
-	sort.Sort(blog.BlogMetadataSortCreatedDescending(projectFiles))
 	return projectFiles, metaMap, nil
 }
 
@@ -148,12 +150,11 @@ func updateBlogMetadata(old []blog.BlogMetadata, new []blog.BlogMetadata, newMet
 
 		// Updation Case
 		} else {
-			updateLog = append(updateLog, UpdateLog{ Updated, blogMetadata.Path })
-
 			// This is all we need this function for really. Other than this it's all statistics.
 
 			// We consider the update stamp to be the created stamp in this case.
 			if new[v].Hash != blogMetadata.Hash {
+				updateLog = append(updateLog, UpdateLog{ Updated, blogMetadata.Path })
 				new[v].Updated = new[v].Created
 			}
 
@@ -163,8 +164,6 @@ func updateBlogMetadata(old []blog.BlogMetadata, new []blog.BlogMetadata, newMet
 			// We delete whatever we have processed to single out the new entries.
 			delete(newMetaMap, blogMetadata.Path)
 		}
-
-
 	}
 
 	// Creation Case
@@ -185,7 +184,7 @@ func prepareBlogMetadata(old []blog.BlogMetadata, files []fs.DirEntry, useFileTi
 	projectFiles, metaMap, err := scanBlogFiles(files, useFileTimestampAsCreationDate)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, util.Error(err)
 	}
 
 	updateLog := updateBlogMetadata(old, projectFiles, metaMap)
@@ -218,13 +217,13 @@ func Init(
 
 	// Chdir to project base
 	if err := os.Chdir(basePath); err != nil {
-		return ProjectState{}, nil, err
+		return ProjectState{}, nil, util.Error(err)
 	}
 
 	base, err := os.ReadDir(basePath)
 
 	if err != nil {
-		return ProjectState{}, nil, err
+		return ProjectState{}, nil, util.Error(err)
 	}
 
 	var updateLog []UpdateLog = nil
@@ -234,7 +233,7 @@ func Init(
 		projectFiles, updateLog, err = prepareBlogMetadata(params.Files, base, params.UseFileTimestampAsCreationDate)
 
 		if err != nil {
-			return ProjectState{}, nil, err
+			return ProjectState{}, nil, util.Error(err)
 		}
 
 		// Replace old files with current.
@@ -242,7 +241,7 @@ func Init(
 	}
 
 	if err != nil {
-		return ProjectState{}, updateLog, err
+		return ProjectState{}, updateLog, util.Error(err)
 	}
 
 	var tmpl blog.BlogTemplate
@@ -255,7 +254,7 @@ func Init(
 		tmpl, err = blog.LoadTemplate(f)
 
 		if err != nil {
-			return ProjectState{}, nil, err
+			return ProjectState{}, nil, util.Error(err)
 		}
 	}
 
@@ -286,7 +285,7 @@ func Load(basePath string) (ProjectState, error) {
 
 	// Chdir to project base
 	if err := os.Chdir(basePath); err != nil {
-		return ProjectState{}, err
+		return ProjectState{}, util.Error(err)
 	}
 
 	// Read and unmarshal
@@ -296,7 +295,7 @@ func Load(basePath string) (ProjectState, error) {
 		if os.IsNotExist(err) {
 			return ProjectState{}, ErrNoConfigFileFound
 		} else {
-			return ProjectState{}, err
+			return ProjectState{}, util.Error(err)
 		}
 	}
 
@@ -304,7 +303,7 @@ func Load(basePath string) (ProjectState, error) {
 	err = json.Unmarshal(data, &params);
 
 	if err != nil {
-		return ProjectState{}, err
+		return ProjectState{}, util.Error(err)
 	}
 
 
@@ -318,7 +317,7 @@ func Load(basePath string) (ProjectState, error) {
 		tmpl, err = blog.LoadTemplate(f)
 
 		if err != nil {
-			return ProjectState{}, err
+			return ProjectState{}, util.Error(err)
 		}
 	}
 
@@ -347,13 +346,13 @@ func (state *ProjectState) Scan() ([]UpdateLog, error) {
 
 	// Chdir to project base
 	if err := os.Chdir(state.BasePath); err != nil {
-		return nil, err
+		return nil, util.Error(err)
 	}
 
 	base, err := os.ReadDir(state.BasePath)
 
 	if err != nil {
-		return nil, err
+		return nil, util.Error(err)
 	}
 
 	projectFiles, updateLog, err := prepareBlogMetadata(state.Files, base, state.UseFileTimestampAsCreationDate)
@@ -362,10 +361,10 @@ func (state *ProjectState) Scan() ([]UpdateLog, error) {
 	state.Files = projectFiles
 
 	if err != nil {
-		return nil, err
+		return nil, util.Error(err)
 	}
 
-	return updateLog, err
+	return updateLog, util.Error(err)
 }
 
 func (state ProjectState) WriteConfig() error {
@@ -385,17 +384,17 @@ func (state ProjectState) WriteConfig() error {
 
 	// Chdir to project base
 	if err := os.Chdir(state.BasePath); err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	data, err := json.MarshalIndent(state.ConfigFileParams, "", "\t")
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	err = os.WriteFile(ProjectConfigFileName, data, 0644);
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	return nil
@@ -408,7 +407,7 @@ func sanitizeString(s string) string {
 	return timePrefix + DefaultWhitespaceReplacement + sanitized
 }
 
-func (state ProjectState) NewFile(b blog.BlogFileContents, filenameOverride string) error {
+func (state ProjectState) NewFile(b blog.BlogFileContents, filenameOverride string) (string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		util.LogErr(err)
@@ -425,7 +424,7 @@ func (state ProjectState) NewFile(b blog.BlogFileContents, filenameOverride stri
 
 	// Chdir to project base
 	if err := os.Chdir(state.BasePath); err != nil {
-		return err
+		return "", util.Error(err)
 	}
 
 	var filename string
@@ -436,24 +435,30 @@ func (state ProjectState) NewFile(b blog.BlogFileContents, filenameOverride stri
 		filename = filenameOverride
 	}
 
-	filePath := filepath.Join(state.BasePath, sanitizeString(filename) + "." + DefaultBlogFileExtension)
+	filePath := filepath.Join(state.BasePath, sanitizeString(filename) + DefaultBlogFileExtension)
+
+	_, err = os.Stat(filePath)
+
+	if !os.IsNotExist(err) {
+		return filePath, ErrFileAlreadyExists(filePath)
+	}
 
 	file, err := os.OpenFile(filePath, os.O_WRONLY | os.O_CREATE, 0644)
 	if err != nil {
-		return err
+		return filePath, util.Error(err)
 	}
 
 	err = static.WriteBlogFile(state.MetadataType, file, b)
 	if err != nil {
-		return err
+		return filePath, util.Error(err)
 	}
 
 	file.Close()
 	if err != nil {
-		return err
+		return filePath, util.Error(err)
 	}
 
-	return nil
+	return filePath, nil
 }
 
 func (state ProjectState) Render(renderOverride string) error {
@@ -473,7 +478,7 @@ func (state ProjectState) Render(renderOverride string) error {
 
 	// Chdir to project base
 	if err := os.Chdir(state.BasePath); err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	err = render.Render(state.BasePath, &state.Template, state.ConfigFileParams, renderOverride)

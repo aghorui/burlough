@@ -4,7 +4,10 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
+
+var LogLevel = 0
 
 // Regex for creating a URL/filename-safe or "wise" string.
 // Does NOT replace whitespace. Use string.Fields and then join using a
@@ -41,4 +44,9 @@ func SplitCommaList(s string) []string {
 	}
 
 	return ret
+}
+
+// Standard timestamp.
+func GetStandardTimestampString(t time.Time) string {
+	return t.Format("02 January 2006")
 }

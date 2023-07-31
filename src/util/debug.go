@@ -1,5 +1,3 @@
-////  go:build !RELEASE
-
 package util
 
 import (
@@ -8,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // Get file, line number and function name of the place where the grandparent
@@ -23,6 +22,11 @@ func SrcStamp(level int) string {
 	file = filepath.Base(file)
 
 	funcName := runtime.FuncForPC(pc).Name()
+
+	// Get rid of the package name
+	if i := strings.LastIndex(funcName, "/"); i >= 0 {
+		funcName = funcName[i:]
+	}
 
 	return fmt.Sprintf("%v:%v %v", file, line, funcName)
 }

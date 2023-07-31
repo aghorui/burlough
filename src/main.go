@@ -27,7 +27,7 @@ func main() {
 		if err == ErrInvalidArguments {
 			os.Exit(1)
 		} else {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[Error] %v\n", err)
 			os.Exit(1)
 		}
 	}

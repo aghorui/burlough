@@ -1,7 +1,10 @@
-Warning: Initial testing is still incomplete.
+**Warning: Initial testing is still incomplete.**
 
-<img src="./src/static/default_export_template/assets/template_icon.svg" alt="logo" width="32" height="32" /> Burlough
-========
+<p align="center">
+	<img src="./src/static/default_export_template/assets/template_icon.svg" alt="logo" width="64" height="64" /> <br />
+	<b><big>Burlough</big></b>
+	<hr />
+</p>
 
 Burlough is yet another static blog generator that processes Markdown files
 into HTML pages. Rendered blogs can be put as-is into static webpage hosting

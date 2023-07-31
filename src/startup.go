@@ -29,7 +29,7 @@ const (
 const usageString =
 `Usage: %v <subcommand> [arguments]
 
-The commands are:
+The subcommands are:
 
 	init      Initialize a new project in the current directory
 	new       Add a new blog file to the project (untracked by project)
@@ -46,7 +46,7 @@ The following arguments are also supported:
 const configUsageString =
 `Usage: %v config <subcommand> [arguments]
 
-The commands are:
+The subcommands are:
 
 	get [key]             Gets a config key
 	set -[key]=[value]    Sets a config key
@@ -59,6 +59,7 @@ var ErrProjectAlreadyExists = fmt.Errorf("Project file already exists in current
 var ErrProjectDoesNotExist  = fmt.Errorf("Project file does not exist in current folder. Create a project using the 'init' subcommand.")
 var ErrInvalidMetadataType  = fmt.Errorf("Invalid header metadata type. Type must be either 'toml' or 'yaml'.")
 var ErrMalformedConfigFile  = fmt.Errorf("Config file values seem to be incorrect. Have you modified them?")
+var ErrNoBlogFiles            = fmt.Errorf("There are no tracked blog files in the current directory.")
 
 func LoadConfig(args []string) error {
 	var showVersion bool
@@ -115,13 +116,22 @@ func LoadConfig(args []string) error {
 	case CommandNewFile:
 		var c blog.BlogFileContents
 		var tags string
+		var filenameOverride string
+		var edit bool
 
 		newFlags := flag.NewFlagSet("new", flag.ExitOnError)
 		newFlags.StringVar(&c.Title, "title", "My Blog Post", "Name of your blog.")
 		newFlags.StringVar(&c.Desc, "description", "", "Short description of your blog post.")
 		newFlags.StringVar(&tags, "tags", "", "Tags for your blog post.")
+		newFlags.StringVar(&filenameOverride, "filename", "", "Set explicit filename")
+		newFlags.BoolVar(&edit, "edit", false, "Edit the file after creation.")
+
 
 		c.Tags = util.SplitCommaList(tags)
+
+		_ = newFlags.Parse(args[2:])
+
+		newFile(c, filenameOverride, edit)
 
 
 	case CommandConfig:
@@ -338,7 +348,7 @@ func initProject(c blog.ConfigFileParams, scan bool) error {
 }
 
 
-func newFile(b blog.BlogFileContents, filenameOverride string) error {
+func newFile(b blog.BlogFileContents, filenameOverride string, edit bool) error {
 	if !projectFileExists() {
 		return ErrProjectDoesNotExist
 	}
@@ -354,9 +364,15 @@ func newFile(b blog.BlogFileContents, filenameOverride string) error {
 		return err
 	}
 
-	err = state.NewFile(b, filenameOverride)
+	path, err = state.NewFile(b, filenameOverride)
 	if err != nil {
 		return err
+	}
+
+	fmt.Printf("Created file: %v\n", path)
+
+	if edit {
+		editFile(path)
 	}
 
 	return nil
@@ -439,6 +455,17 @@ func editFile(filename string) error {
 		return ErrProjectDoesNotExist
 	}
 
+	path, err := os.Getwd()
+
+	if err != nil {
+		return err
+	}
+
+	state, err := project.Load(path)
+	if err != nil {
+		return err
+	}
+
 	editor, ok := os.LookupEnv(constants.AppEnvironmentVarPrefix + "EDITOR")
 
 	if !ok {
@@ -449,9 +476,29 @@ func editFile(filename string) error {
 		return fmt.Errorf("Error: Neither $EDITOR nor $" + constants.AppEnvironmentVarPrefix + "EDITOR" + " were set.")
 	}
 
-	exec.Command(editor, filename)
+	var finalFilename string
 
-	return nil;
+	if filename == "latest" {
+		if len(state.Files) > 0 {
+			finalFilename = state.Files[0].Path
+		} else {
+			return ErrNoBlogFiles
+		}
+	} else {
+		finalFilename = filename
+	}
+
+	cmd := exec.Command(editor, finalFilename)
+
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func renderProject(renderOverride string) error {

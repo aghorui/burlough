@@ -28,21 +28,27 @@ func renderIndexPage(t *blog.BlogTemplate, params blog.ConfigFileParams, entries
 	})
 
 	if err != nil {
-		return buf.Bytes(), err
+		return buf.Bytes(), util.Error(err)
 	}
 
-	return buf.Bytes(), err 
+	return buf.Bytes(), nil
 }
 
 func renderFrontPage(t *blog.BlogTemplate, params blog.ConfigFileParams, entries []blog.BlogTemplateEntry) ([]byte, error) {
 	var buf bytes.Buffer
-	err := t.FrontPage.Execute(&buf, RenderPageInput{ Entries: entries })
+	util.DumpVar(params)
+	err := t.FrontPage.Execute(&buf, RenderPageInput{
+		Title: params.Title,
+		Desc: params.Desc,
+		Tags: params.Tags,
+		Entries: entries,
+	})
 
 	if err != nil {
-		return buf.Bytes(), err
+		return buf.Bytes(), util.Error(err)
 	}
 
-	return buf.Bytes(), err
+	return buf.Bytes(), nil
 }
 
 func renderBlogPage(t *blog.BlogTemplate, page blog.BlogTemplateEntry) ([]byte, error) {
@@ -50,10 +56,10 @@ func renderBlogPage(t *blog.BlogTemplate, page blog.BlogTemplateEntry) ([]byte, 
 	err := t.BlogPage.Execute(&buf, page)
 
 	if err != nil {
-		return buf.Bytes(), err
+		return buf.Bytes(), util.Error(err)
 	}
 
-	return buf.Bytes(), err
+	return buf.Bytes(), nil
 }
 
 func Render(basePath string, tmpl *blog.BlogTemplate, params blog.ConfigFileParams, renderOverride string) error {
@@ -69,19 +75,21 @@ func Render(basePath string, tmpl *blog.BlogTemplate, params blog.ConfigFilePara
 
 	err := tmpl.CopyAssetsToFolder(renderPath)
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	err = os.MkdirAll(renderPath, 0755)
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	// Prepare all articles
-	for _, file := range params.Files {
+	for index, file := range params.Files {
+		fmt.Fprintf(os.Stderr, "Processing %v (%v/%v)\n", file.Path, index + 1, len(params.Files))
+
 		data, err := os.ReadFile(filepath.Join(basePath, file.Path))
 		if err != nil {
-			return err
+			return util.Error(err)
 		}
 
 		finalPath := util.ExtractFilename(file.Path) + ".html"
@@ -89,7 +97,7 @@ func Render(basePath string, tmpl *blog.BlogTemplate, params blog.ConfigFilePara
 		page, noMetadata, err := parse.ParseBlogFile(data)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Error encountered while parsing %v: %w", file.Path, err)
 		}
 
 		if noMetadata {
@@ -106,41 +114,42 @@ func Render(basePath string, tmpl *blog.BlogTemplate, params blog.ConfigFilePara
 		renderedPage, err := renderBlogPage(tmpl, te)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Error encountered while rendering %v: %w", file.Path, err)
 		}
 
 		err = os.WriteFile(
 			filepath.Join(renderPath, finalPath),
 			renderedPage, 0644)
+
 		if err != nil {
-			return err
+			return fmt.Errorf("Error encountered while writing %v: %w", filepath.Join(renderPath, finalPath), err)
 		}
 	}
 
 	// Prepare blog index
 	indexPage, err := renderIndexPage(tmpl, params, entries)
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	err = os.WriteFile(
 		filepath.Join(renderPath, "blog_index" + ".html"),
 		indexPage, 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error encountered while blog index file: %w", err)
 	}
 
 	// Prepare front page
 	frontPage, err := renderFrontPage(tmpl, params, entries)
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	err = os.WriteFile(
 		filepath.Join(renderPath, "index" + ".html"),
 		frontPage, 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error encountered while site index file: %w", err)
 	}
 
 	return nil

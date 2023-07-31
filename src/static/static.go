@@ -81,7 +81,7 @@ func WriteBlogFile(t blog.MetadataType, wr io.Writer, b blog.BlogFileContents) e
 	}
 
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	return nil
@@ -117,7 +117,7 @@ func DumpDefaultExportTemplate(dest string) error {
 
 	err := os.MkdirAll(finalDest, 0755)
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	// This is a weird thing. I have to explicitly set the permissions of the
@@ -129,7 +129,7 @@ func DumpDefaultExportTemplate(dest string) error {
 	})
 
 	if err != nil {
-		return err
+		return util.Error(err)
 	}
 
 	return nil
