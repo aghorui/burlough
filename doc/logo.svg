@@ -2,14 +2,37 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="775.49939"
-   height="216.42444"
-   viewBox="0 0 205.18421 57.262298"
+   width="397.54703"
+   height="110.02367"
+   viewBox="0 0 105.18432 29.110428"
    version="1.1"
    id="svg5"
+   sodipodi:docname="logo.svg"
+   inkscape:version="1.2.2 (1:1.2.2+202212051552+b0a8486541)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview64"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.61380351"
+     inkscape:cx="106.71167"
+     inkscape:cy="-74.127956"
+     inkscape:window-width="1920"
+     inkscape:window-height="1013"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5" />
   <defs
      id="defs2">
     <linearGradient
@@ -220,6 +243,7 @@
        y2="12.997994"
        gradientUnits="userSpaceOnUse" />
     <linearGradient
+       inkscape:collect="always"
        xlink:href="#linearGradient5096"
        id="linearGradient1228"
        gradientUnits="userSpaceOnUse"
@@ -229,6 +253,7 @@
        x2="35.901375"
        y2="71.938011" />
     <linearGradient
+       inkscape:collect="always"
        xlink:href="#linearGradient5080"
        id="linearGradient1230"
        gradientUnits="userSpaceOnUse"
@@ -238,6 +263,7 @@
        x2="24.722771"
        y2="47.22686" />
     <filter
+       inkscape:collect="always"
        style="color-interpolation-filters:sRGB"
        id="filter1247"
        x="-0.066985724"
@@ -245,13 +271,14 @@
        width="1.1339714"
        height="1.1331218">
       <feGaussianBlur
+         inkscape:collect="always"
          stdDeviation="0.66779725"
          id="feGaussianBlur1249" />
     </filter>
   </defs>
   <g
      id="g252"
-     transform="translate(-25.992992,-18.734947)">
+     transform="matrix(0.48548108,0,0,0.48548108,-10.513715,-8.9376058)">
     <g
        id="layer1"
        transform="matrix(0.95069193,0,0,0.95069193,28.222085,22.629354)"
@@ -433,7 +460,8 @@
   <g
      aria-label="Burlough"
      id="text372"
-     style="font-size:31.6427px;fill:none;stroke:#00b0e8;stroke-width:7.00359">
+     style="font-size:31.6427px;fill:none;stroke:#00b0e8;stroke-width:7.00359"
+     transform="matrix(0.52646405,0,0,0.52646405,-2.3418809,-0.77908382)">
     <path
        d="m 62.336277,37.278194 v -22.14989 h 9.967451 q 2.183346,0 3.670553,0.759425 1.487207,0.727782 2.246632,2.025133 0.791067,1.297351 0.791067,2.974414 0,1.550492 -0.632854,2.879485 -0.601211,1.328994 -2.246632,1.993491 v 0.03164 q 1.613778,0.411355 2.68963,1.740349 1.075852,1.328993 1.075852,3.227555 0,1.99349 -0.854353,3.449055 -0.854353,1.455564 -2.468131,2.278274 -1.613778,0.791067 -3.923695,0.791067 z m 3.354126,-2.974413 h 6.803181 q 1.99349,0 2.974414,-0.885996 0.980923,-0.885996 0.980923,-2.752915 0,-1.582135 -1.012566,-2.404845 -1.012566,-0.854353 -2.784558,-0.854353 h -6.961394 z m 0,-9.872523 h 6.739895 q 1.677064,0 2.499774,-0.82271 0.854353,-0.82271 0.854353,-2.373203 0,-1.487206 -0.885996,-2.309917 -0.885996,-0.82271 -2.784558,-0.82271 h -6.423468 z"
        style="font-family:REM;-inkscape-font-specification:REM;fill:#000000;stroke:none"
