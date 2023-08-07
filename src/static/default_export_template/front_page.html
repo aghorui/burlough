@@ -27,6 +27,9 @@
 	{{range $index, $file := .Entries}}
 		<div class="post_entry">
 			<a href="{{$file.URL}}">{{$file.Title}}</a>
+			{{if $file.Desc}}
+				: {{$file.Desc}}
+			{{end}}
 		</div>
 	{{end}}
 	</div>

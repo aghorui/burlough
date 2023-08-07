@@ -364,7 +364,7 @@ func (state *ProjectState) Scan() ([]UpdateLog, error) {
 		return nil, util.Error(err)
 	}
 
-	return updateLog, util.Error(err)
+	return updateLog, nil
 }
 
 func (state ProjectState) WriteConfig() error {

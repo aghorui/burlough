@@ -36,7 +36,6 @@ func renderIndexPage(t *blog.BlogTemplate, params blog.ConfigFileParams, entries
 
 func renderFrontPage(t *blog.BlogTemplate, params blog.ConfigFileParams, entries []blog.BlogTemplateEntry) ([]byte, error) {
 	var buf bytes.Buffer
-	util.DumpVar(params)
 	err := t.FrontPage.Execute(&buf, RenderPageInput{
 		Title: params.Title,
 		Desc: params.Desc,

@@ -53,15 +53,15 @@ type BlogFile struct {
 
 // Parameters for a blog project unmarshalled from a config file.
 type ConfigFileParams struct {
-	Title string                        // Title of the blog
-	Desc string                         // Short description of the blog. Goes in the <meta> tags.
-	Tags []string                       // Tags for the blog. Goes in the <meta> tags.
-	BlogURLPathPrefix string            // This prefix will be added to all in-site URLs that are generated.
-	RenderPath string                   // Path to where the rendered files should be put.
-	TemplatePath string                 // Path to template.
-	UseFileTimestampAsCreationDate bool // Use File Timestamp As Creation date.
-	Files []BlogMetadata                // List of blog markdown files.
-	MetadataType MetadataType           // Type of the blog file metadata (TOML/YAML)
+	Title string                        `json:"title"`                // Title of the blog
+	Desc string                         `json:"description"`          // Short description of the blog. Goes in the <meta> tags.
+	Tags []string                       `json:"tags"`                 // Tags for the blog. Goes in the <meta> tags.
+	BlogURLPathPrefix string            `json:"blog_url_path_prefix"` // NOT IMPLEMENTED This prefix will be added to all in-site URLs that are generated.
+	RenderPath string                   `json:"renderpath"`           // Path to where the rendered files should be put.
+	TemplatePath string                 `json:"templatepath"`         // Path to template.
+	UseFileTimestampAsCreationDate bool `json:"use_file_timestamp_as_creation_date"` // Use File Timestamp As Creation date.
+	MetadataType MetadataType           `json:"metadata_type"`        // Type of the blog file metadata (TOML/YAML)
+	Files []BlogMetadata                `json:"files"`                // List of blog markdown files.
 }
 
 // Contains all required template files

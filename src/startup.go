@@ -50,16 +50,17 @@ The subcommands are:
 
 	get [key]             Gets a config key
 	set -[key]=[value]    Sets a config key
+	list                  Lists all keys and their values
 
-	set -h will list all config keys that can be set
 `
 
-var ErrInvalidArguments     = fmt.Errorf("Invalid Arguments.")
-var ErrProjectAlreadyExists = fmt.Errorf("Project file already exists in current folder.")
-var ErrProjectDoesNotExist  = fmt.Errorf("Project file does not exist in current folder. Create a project using the 'init' subcommand.")
-var ErrInvalidMetadataType  = fmt.Errorf("Invalid header metadata type. Type must be either 'toml' or 'yaml'.")
-var ErrMalformedConfigFile  = fmt.Errorf("Config file values seem to be incorrect. Have you modified them?")
-var ErrNoBlogFiles            = fmt.Errorf("There are no tracked blog files in the current directory.")
+var ErrInvalidArguments        = fmt.Errorf("Invalid Arguments.")
+var ErrProjectAlreadyExists    = fmt.Errorf("Project file already exists in current folder.")
+var ErrProjectDoesNotExist     = fmt.Errorf("Project file does not exist in current folder. Create a project using the 'init' subcommand.")
+var ErrInvalidMetadataType     = fmt.Errorf("Invalid header metadata type. Type must be either 'toml' or 'yaml'.")
+var ErrMalformedConfigFile     = fmt.Errorf("Config file values seem to be incorrect. Have you modified them?")
+var ErrNoBlogFiles             = fmt.Errorf("There are no tracked blog files in the current directory. Please add the files in the directory using the 'scan' subcommand.")
+var ErrNoConfigOptionSpecified = fmt.Errorf("No Config Option Specified.")
 
 func LoadConfig(args []string) error {
 	var showVersion bool
@@ -223,6 +224,17 @@ func LoadConfig(args []string) error {
 
 			_ = cfgFlags.Parse(args[3:])
 
+			flagIsSet := false
+
+			cfgFlags.Visit(func(f *flag.Flag) {
+				flagIsSet = true
+			})
+
+			if !flagIsSet {
+				cfgFlags.Usage()
+				return ErrNoConfigOptionSpecified
+			}
+
 			switch strings.ToLower(metadataType) {
 			case "toml":
 				state.MetadataType = blog.TOML
@@ -238,6 +250,35 @@ func LoadConfig(args []string) error {
 			if err != nil {
 				return err
 			}
+
+		case "list":
+			path, err := os.Getwd()
+
+			if err != nil {
+				return err
+			}
+
+			state, err := project.Load(path)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("title='%v'\n", state.Title)
+			fmt.Printf("description='%v'\n", state.Desc)
+			fmt.Printf("tags='%v'\n", state.Tags)
+			fmt.Printf("renderpath='%v'\n", state.RenderPath)
+			fmt.Printf("templatepath='%v'\n", state.TemplatePath)
+			fmt.Printf("metadata_type=")
+
+			if state.MetadataType == blog.TOML {
+				fmt.Printf("'toml'\n");
+			} else if state.MetadataType == blog.YAML {
+				fmt.Printf("'yaml'\n");
+			} else {
+				panic(fmt.Errorf("Invalid Metadata Type found: %v.", state.MetadataType));
+			}
+
+			fmt.Printf("use_file_timestamp_as_creation_date='%v'\n", state.UseFileTimestampAsCreationDate)
 
 
 		default:
