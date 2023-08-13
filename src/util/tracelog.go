@@ -2,7 +2,10 @@
 
 package util
 
-import "log"
+import (
+	"log"
+	"runtime/debug"
+)
 
 func LogTrace(args ...any) {
 	log.Println(args...)
@@ -10,4 +13,8 @@ func LogTrace(args ...any) {
 
 func LogTracef(format string, args ...any) {
 	log.Printf(format, args...)
+}
+
+func PrintStack() {
+	debug.PrintStack()
 }

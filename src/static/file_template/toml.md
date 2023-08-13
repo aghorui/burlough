@@ -1,6 +1,6 @@
 +++
 title = "{{.Title}}"
-tags = [{{.Tags}}]
+tags = {{tagsToString .Tags}}
 desc = "{{.Desc}}"
 +++
 

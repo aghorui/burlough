@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/aghorui/burlough/blog"
+	"github.com/aghorui/burlough/blogtemplate"
 	"github.com/aghorui/burlough/parse"
 	"github.com/aghorui/burlough/util"
 )
@@ -15,10 +16,13 @@ type RenderPageInput struct {
 	Title string
 	Desc string
 	Tags blog.Tags
-	Entries []blog.BlogTemplateEntry
+	Entries []blogtemplate.BlogTemplateEntry
 }
 
-func renderIndexPage(t *blog.BlogTemplate, params blog.ConfigFileParams, entries []blog.BlogTemplateEntry) ([]byte, error) {
+func renderIndexPage(
+		t *blogtemplate.BlogTemplate,
+		params blog.ConfigFileParams,
+		entries []blogtemplate.BlogTemplateEntry) ([]byte, error) {
 	var buf bytes.Buffer
 	err := t.IndexPage.Execute(&buf, RenderPageInput{
 		Title: params.Title,
@@ -34,8 +38,12 @@ func renderIndexPage(t *blog.BlogTemplate, params blog.ConfigFileParams, entries
 	return buf.Bytes(), nil
 }
 
-func renderFrontPage(t *blog.BlogTemplate, params blog.ConfigFileParams, entries []blog.BlogTemplateEntry) ([]byte, error) {
+func renderFrontPage(
+	t *blogtemplate.BlogTemplate,
+	params blog.ConfigFileParams,
+	entries []blogtemplate.BlogTemplateEntry) ([]byte, error) {
 	var buf bytes.Buffer
+
 	err := t.FrontPage.Execute(&buf, RenderPageInput{
 		Title: params.Title,
 		Desc: params.Desc,
@@ -50,7 +58,9 @@ func renderFrontPage(t *blog.BlogTemplate, params blog.ConfigFileParams, entries
 	return buf.Bytes(), nil
 }
 
-func renderBlogPage(t *blog.BlogTemplate, page blog.BlogTemplateEntry) ([]byte, error) {
+func renderBlogPage(
+	t *blogtemplate.BlogTemplate,
+	page blogtemplate.BlogTemplateEntry) ([]byte, error) {
 	var buf bytes.Buffer
 	err := t.BlogPage.Execute(&buf, page)
 
@@ -61,8 +71,13 @@ func renderBlogPage(t *blog.BlogTemplate, page blog.BlogTemplateEntry) ([]byte, 
 	return buf.Bytes(), nil
 }
 
-func Render(basePath string, tmpl *blog.BlogTemplate, params blog.ConfigFileParams, renderOverride string) error {
-	entries := make([]blog.BlogTemplateEntry, 0, len(params.Files))
+// Renders/Exports the project.
+func Render(
+	basePath string,
+	tmpl *blogtemplate.BlogTemplate,
+	params blog.ConfigFileParams,
+	renderOverride string) error {
+	entries := make([]blogtemplate.BlogTemplateEntry, 0, len(params.Files))
 
 	var renderPath string
 
@@ -103,7 +118,7 @@ func Render(basePath string, tmpl *blog.BlogTemplate, params blog.ConfigFilePara
 			fmt.Fprintf(os.Stderr, "Warning: file %v has no metadata.\n", file.Path)
 		}
 
-		te := blog.PrepareBlogTemplateEntry(blog.BlogFile{
+		te := blogtemplate.PrepareBlogTemplateEntry(blog.BlogFile{
 			BlogMetadata: file,
 			BlogFileContents: page,
 		}, finalPath, params.Desc, params.Tags)

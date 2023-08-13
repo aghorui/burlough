@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/aghorui/burlough/blog"
+	"github.com/aghorui/burlough/blogtemplate"
 	"github.com/aghorui/burlough/render"
 	"github.com/aghorui/burlough/static"
 	"github.com/aghorui/burlough/util"
@@ -35,7 +36,7 @@ func ErrFileAlreadyExists(filePath string) error {
 type ProjectState struct {
 	BasePath string            // Path to the base folder of the project.
 	                           // The program will chdir to this path.
-	Template blog.BlogTemplate // Template Struct.
+	Template blogtemplate.BlogTemplate // Template Struct.
 	blog.ConfigFileParams      // Include config file params into struct
 }
 
@@ -244,14 +245,14 @@ func Init(
 		return ProjectState{}, updateLog, util.Error(err)
 	}
 
-	var tmpl blog.BlogTemplate
+	var tmpl blogtemplate.BlogTemplate
 
 	if params.TemplatePath == "" {
-		tmpl = static.DefaultBlogTemplate
+		tmpl = blogtemplate.DefaultBlogTemplate
 	} else {
 		f := os.DirFS(params.TemplatePath)
 
-		tmpl, err = blog.LoadTemplate(f)
+		tmpl, err = blogtemplate.LoadTemplate(f)
 
 		if err != nil {
 			return ProjectState{}, nil, util.Error(err)
@@ -307,14 +308,14 @@ func Load(basePath string) (ProjectState, error) {
 	}
 
 
-	var tmpl blog.BlogTemplate
+	var tmpl blogtemplate.BlogTemplate
 
 	if params.TemplatePath == "" {
-		tmpl = static.DefaultBlogTemplate
+		tmpl = blogtemplate.DefaultBlogTemplate
 	} else {
 		f := os.DirFS(params.TemplatePath)
 
-		tmpl, err = blog.LoadTemplate(f)
+		tmpl, err = blogtemplate.LoadTemplate(f)
 
 		if err != nil {
 			return ProjectState{}, util.Error(err)

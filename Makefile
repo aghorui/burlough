@@ -3,8 +3,8 @@ DELVE           := dlv
 NPM             := npm
 SRC_DIRECTORY   := src
 BIN_DIRECTORY   := build
-BIN_NAME        := burlough
-DEBUG_BIN_NAME  := burlough_debug
+BIN_NAME        := brlo
+DEBUG_BIN_NAME  := brlo_debug
 PROJECT_ROOT    := $(shell pwd)
 
 

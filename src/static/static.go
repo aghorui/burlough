@@ -4,16 +4,13 @@ import (
 	"embed"
 	"html/template"
 	"io"
-	"io/fs"
-	"os"
-	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/aghorui/burlough/blog"
-	"github.com/aghorui/burlough/constants"
 	"github.com/aghorui/burlough/util"
-
-	"github.com/otiai10/copy"
 )
+
 
 const DefaultTemplateContents template.HTML = `
 # This is the title
@@ -28,7 +25,7 @@ This is another paragraph.
 `
 
 //go:embed default_export_template/*
-var defaultExportTemplate embed.FS
+var DefaultExportTemplate embed.FS
 
 //go:embed file_template/none.md
 var BlogTemplateNoneData []byte
@@ -39,20 +36,50 @@ var BlogTemplateTOMLData []byte
 //go:embed file_template/yaml.md
 var BlogTemplateYAMLData []byte
 
-var BlogTemplateNone = template.Must(template.New("none.md").Parse(string(BlogTemplateNoneData)))
-var BlogTemplateTOML = template.Must(template.New("toml.md").Parse(string(BlogTemplateTOMLData)))
-var BlogTemplateYAML = template.Must(template.New("yaml.md").Parse(string(BlogTemplateYAMLData)))
+// Coverts a blog tagset to a TOML parseable string array
+func TagsToStringTOML(t blog.Tags) template.HTML {
+	var b strings.Builder
+	var l int = 0
 
-var DefaultBlogTemplate blog.BlogTemplate = func() blog.BlogTemplate {
-	dir := GetDefaultExportTemplateFS()
-
-	return blog.BlogTemplate{
-		TemplateFS:  &dir,
-		FrontPage: template.Must(template.New("front_page.html").ParseFS(GetDefaultExportTemplateFS(), "front_page.html")),
-		BlogPage:  template.Must(template.New("blog_page.html").ParseFS(GetDefaultExportTemplateFS(), "blog_page.html")),
-		IndexPage: template.Must(template.New("blog_list.html").ParseFS(GetDefaultExportTemplateFS(), "blog_list.html")),
+	for _, v := range t {
+		l += len(v) + 4 // 2 quotes + comma + space
 	}
-}()
+
+	l += 4 // "[" + " " + " " + "]"
+
+	b.Grow(l)
+
+	b.WriteString("[ ")
+
+	for _, v := range t[:len(t) - 1] {
+		b.WriteString(strconv.Quote(v))
+		b.WriteString(", ")
+	}
+
+	b.WriteString(strconv.Quote(t[len(t) - 1]))
+
+	b.WriteString(" ]")
+
+	return template.HTML(b.String())
+}
+
+// Converts a blog tagset to a YAML parseable string array
+func TagsToStringYAML(t blog.Tags) template.HTML {
+	return "[ " + template.HTML(strings.Join(t, ", ")) + " ]"
+}
+
+var BlogTemplateNone = template.Must(template.New("none.md").Parse(string(BlogTemplateNoneData)))
+
+var BlogTemplateTOML = template.Must(
+	template.New("toml.md").Funcs(
+		template.FuncMap{
+			"tagsToString": TagsToStringTOML,
+		}).Parse(string(BlogTemplateTOMLData)))
+
+var BlogTemplateYAML = template.Must(template.New("yaml.md").Funcs(
+		template.FuncMap{
+			"tagsToString": TagsToStringYAML,
+		}).Parse(string(BlogTemplateYAMLData)))
 
 // Generates a default blog file for use. Fields can be overriden with `n`
 func GenerateDefaultBlogFileContents(n blog.BlogFileContents) blog.BlogFileContents {
@@ -79,54 +106,6 @@ func WriteBlogFile(t blog.MetadataType, wr io.Writer, b blog.BlogFileContents) e
 	} else if t == blog.YAML {
 		err = BlogTemplateYAML.Execute(wr, b)
 	}
-
-	if err != nil {
-		return util.Error(err)
-	}
-
-	return nil
-}
-
-// Gets the directory listing of default_export_template
-func GetDefaultExportTemplateFiles() []fs.DirEntry {
-	files, err := defaultExportTemplate.ReadDir("default_export_template")
-
-	if err != nil {
-		util.LogErr(err)
-		panic(err)
-	}
-
-	return files
-}
-
-// Gets the FS for default_export_template because we can't do subdirs directly.
-func GetDefaultExportTemplateFS() fs.FS {
-	dir, err := fs.Sub(defaultExportTemplate, "default_export_template")
-
-	if err != nil {
-		util.LogErr(err)
-		panic(err)
-	}
-
-	return dir
-}
-
-
-func DumpDefaultExportTemplate(dest string) error {
-	finalDest := filepath.Join(dest, constants.AppName + "_default_export_template")
-
-	err := os.MkdirAll(finalDest, 0755)
-	if err != nil {
-		return util.Error(err)
-	}
-
-	// This is a weird thing. I have to explicitly set the permissions of the
-	// embed.FS files to get the actually correct permissions ORed with the
-	// supposed umask. 0644 seems to get the job done.
-	err = copy.Copy("default_export_template", finalDest, copy.Options{
-		FS: defaultExportTemplate,
-		PermissionControl: copy.AddPermission(0644),
-	})
 
 	if err != nil {
 		return util.Error(err)

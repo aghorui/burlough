@@ -5,7 +5,6 @@ import (
 	"os"
 )
 
-
 func main() {
 	err := LoadConfig(os.Args)
 

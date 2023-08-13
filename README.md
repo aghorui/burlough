@@ -1,5 +1,3 @@
-**Warning: Initial testing is still incomplete.**
-
 <img src="./doc/logo.svg" alt="Burlough" />
 
 <!---------------------------------
@@ -255,6 +253,7 @@ Goldmark              https://pkg.go.dev/github.com/yuin/goldmark
 Goldmark-Highlighting https://pkg.go.dev/github.com/yuin/goldmark-highlighting
 Goldmark-Frontmatter  https://pkg.go.dev/go.abhg.dev/goldmark/frontmatter
 Copy                  https://pkg.go.dev/github.com/otiai10/copy
+Testify               https://pkg.go.dev/github.com/stretchr/testify
 ```
 
 ## License

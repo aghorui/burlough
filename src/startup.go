@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/aghorui/burlough/blog"
+	"github.com/aghorui/burlough/blogtemplate"
 	"github.com/aghorui/burlough/constants"
 	"github.com/aghorui/burlough/project"
-	"github.com/aghorui/burlough/static"
 	"github.com/aghorui/burlough/util"
 )
 
@@ -334,7 +334,7 @@ func LoadConfig(args []string) error {
 				return err
 			}
 
-			err = static.DumpDefaultExportTemplate(dir)
+			err = blogtemplate.DumpDefaultExportTemplate(dir)
 			if err != nil {
 				return err
 			}
@@ -414,6 +414,20 @@ func newFile(b blog.BlogFileContents, filenameOverride string, edit bool) error 
 
 	if edit {
 		editFile(path)
+	}
+
+	fmt.Printf("Scanning for changes in %v\n", path)
+
+	ul, err := state.Scan()
+	if err != nil {
+		return err
+	}
+
+	printUpdateLog(ul)
+
+	err = state.WriteConfig()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -557,6 +571,22 @@ func renderProject(renderOverride string) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Scanning for changes in %v\n", path)
+
+	ul, err := state.Scan()
+	if err != nil {
+		return err
+	}
+
+	printUpdateLog(ul)
+
+	err = state.WriteConfig()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Rendering %v\n", path)
 
 	err = state.Render(renderOverride)
 	if err != nil {
