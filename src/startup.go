@@ -3,9 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/chzyer/readline"
 
 	"github.com/aghorui/burlough/blog"
 	"github.com/aghorui/burlough/blogtemplate"
@@ -32,7 +35,7 @@ const usageString =
 The subcommands are:
 
 	init      Initialize a new project in the current directory
-	new       Add a new blog file to the project (untracked by project)
+	new       Add a new blog file to the project
 	config    Show or change a project configuration value
 	scan      Scan and update the project file
 	list      List all tracked files in project
@@ -82,6 +85,7 @@ func LoadConfig(args []string) error {
 		var c blog.ConfigFileParams
 		var tags string
 		var scan bool
+		var wizard bool
 		var metadataType string
 
 		initFlags := flag.NewFlagSet("init", flag.ExitOnError)
@@ -93,8 +97,13 @@ func LoadConfig(args []string) error {
 		initFlags.StringVar(&metadataType, "metadata_type", "toml", "Default Header Metadata Type for your files (toml/yaml).")
 		initFlags.BoolVar(&c.UseFileTimestampAsCreationDate,  "use_file_timestamp_as_creation_date", true, "Use the file modification time as the creation date.")
 		initFlags.BoolVar(&scan, "scan", true, "Scan current directory for blog files immediately.")
+		initFlags.BoolVar(&wizard, "wizard", false, "Enter init parameters using a wizard.")
 
 		_ = initFlags.Parse(args[2:])
+
+		// We use the wizard if no flags have been specified by the user or the
+		// user specifically asks for the wizard to be run.
+		wizard = wizard || !isFlagSet(initFlags)
 
 		switch strings.ToLower(metadataType) {
 		case "toml":
@@ -107,8 +116,7 @@ func LoadConfig(args []string) error {
 
 		c.Tags = util.SplitCommaList(tags)
 
-		err := initProject(c, scan)
-
+		err := initProject(c, scan, wizard)
 		if err != nil {
 			return err
 		}
@@ -119,20 +127,29 @@ func LoadConfig(args []string) error {
 		var tags string
 		var filenameOverride string
 		var edit bool
+		var wizard bool
 
 		newFlags := flag.NewFlagSet("new", flag.ExitOnError)
-		newFlags.StringVar(&c.Title, "title", "My Blog Post", "Name of your blog.")
-		newFlags.StringVar(&c.Desc, "description", "", "Short description of your blog post.")
-		newFlags.StringVar(&tags, "tags", "", "Tags for your blog post.")
+		newFlags.StringVar(&c.Title, "title", "My Blog Post", "Name of your blog")
+		newFlags.StringVar(&c.Desc, "description", "", "Short description of your blog post")
+		newFlags.StringVar(&tags, "tags", "", "Tags for your blog post")
 		newFlags.StringVar(&filenameOverride, "filename", "", "Set explicit filename")
-		newFlags.BoolVar(&edit, "edit", false, "Edit the file after creation.")
+		newFlags.BoolVar(&edit, "edit", true, "Edit the file after creation")
+		newFlags.BoolVar(&wizard, "wizard", true, "Edit the file after creation")
+
+		// We use the wizard if no flags have been specified by the user or the
+		// user specifically asks for the wizard to be run.
+		wizard = wizard || !isFlagSet(newFlags)
 
 
 		c.Tags = util.SplitCommaList(tags)
 
 		_ = newFlags.Parse(args[2:])
 
-		newFile(c, filenameOverride, edit)
+		err := newFile(c, filenameOverride, edit, wizard)
+		if err != nil {
+			return err
+		}
 
 
 	case CommandConfig:
@@ -224,13 +241,7 @@ func LoadConfig(args []string) error {
 
 			_ = cfgFlags.Parse(args[3:])
 
-			flagIsSet := false
-
-			cfgFlags.Visit(func(f *flag.Flag) {
-				flagIsSet = true
-			})
-
-			if !flagIsSet {
+			if !isFlagSet(cfgFlags) {
 				cfgFlags.Usage()
 				return ErrNoConfigOptionSpecified
 			}
@@ -350,6 +361,15 @@ func LoadConfig(args []string) error {
 	return nil
 }
 
+func isFlagSet(fset *flag.FlagSet) bool {
+	flagIsSet := false
+	fset.Visit(func(f *flag.Flag) {
+		flagIsSet = true
+	})
+
+	return flagIsSet
+}
+
 func projectFileExists() bool {
 	_, err := os.Stat(project.ProjectConfigFileName)
 
@@ -360,7 +380,127 @@ func projectFileExists() bool {
 	}
 }
 
-func initProject(c blog.ConfigFileParams, scan bool) error {
+func getMetadataType(metadataType string) (blog.MetadataType, error) {
+	switch strings.ToLower(metadataType) {
+	case "toml":
+		return blog.TOML, nil
+	case "yaml":
+		return blog.YAML, nil
+	default:
+		return blog.Invalid, ErrInvalidMetadataType
+	}
+}
+
+func wizardPromptString(rl *readline.Instance, text string, defaultVal string, target *string) error {
+	rl.SetPrompt(fmt.Sprintf("%v (default: %v): ", text, defaultVal))
+	line, err := rl.Readline()
+
+	if err != nil && err != io.EOF {
+		return err
+	}
+
+	if line == "" {
+		*target = defaultVal
+	} else {
+		*target = line
+	}
+
+	return nil
+}
+
+func wizardPromptBool(rl *readline.Instance, text string, defaultVal bool, target *bool) error {
+	for {
+		defaultValStr := ""
+
+		if defaultVal == true {
+			defaultValStr = "y"
+		} else {
+			defaultValStr = "n"
+		}
+
+		rl.SetPrompt(fmt.Sprintf("%v (y/n) (default: %v): ", text, defaultValStr))
+		line, err := rl.Readline()
+
+		if err != nil && err != io.EOF {
+			return err
+		}
+
+		if line == "y" || line == "Y" {
+			*target = true
+			break
+		} else if line == "n" || line == "N" {
+			*target = false
+			break
+		} else if line == "" {
+			*target = defaultVal
+			break
+		} else {
+			fmt.Printf("Please enter 'y' or 'n' only.\n")
+		}
+	}
+
+	return nil
+}
+
+func initWizard(defaults blog.ConfigFileParams) (blog.ConfigFileParams, error) {
+	var params blog.ConfigFileParams = defaults
+	var tagStr = ""
+	var metadataTypeStr = ""
+
+	path, err := os.Getwd()
+	if err != nil {
+		return params, err
+	}
+
+	rl, err := readline.New("")
+	if err != nil {
+		return params, err
+	}
+	defer rl.Close()
+
+
+	fmt.Printf("Creating a new %v blog in '%v'...\n", constants.AppName, path)
+
+	if err := wizardPromptString(rl, "Title of blog", params.Title, &params.Title); err != nil {
+		return params, err
+	}
+
+	if err := wizardPromptString(rl, "Description of blog", params.Desc, &params.Desc); err != nil {
+		return params, err
+	}
+
+	if err := wizardPromptString(rl, "Tags for blog (comma separated list)", params.Tags.String(), &tagStr); err != nil {
+		return params, err
+	} else {
+		params.Tags = util.SplitCommaList(tagStr)
+	}
+
+	if err := wizardPromptString(rl, "Output path for blog", params.RenderPath, &params.RenderPath); err != nil {
+		return params, err
+	}
+
+	if err := wizardPromptString(rl, "Path to blog template", params.TemplatePath, &params.TemplatePath); err != nil {
+		return params, err
+	}
+
+	for {
+		if err := wizardPromptString(rl, "Default blog metadata type (toml/yaml)", "toml", &metadataTypeStr); err != nil {
+			return params, err
+		}
+
+		params.MetadataType, err = getMetadataType(metadataTypeStr)
+
+		if err != nil {
+			fmt.Printf("Please enter 'toml' or 'yaml' only.\n")
+		} else {
+			break
+		}
+	}
+
+	return params, nil
+}
+
+func initProject(c blog.ConfigFileParams, scan bool, wizard bool) error {
 	if projectFileExists() {
 		return ErrProjectAlreadyExists
 	}
@@ -369,6 +509,13 @@ func initProject(c blog.ConfigFileParams, scan bool) error {
 
 	if err != nil {
 		return err
+	}
+
+	if wizard {
+		c, err = initWizard(c)
+		if err != nil {
+			return err
+		}
 	}
 
 	state, ul, err := project.Init(path, c, scan)
@@ -388,8 +535,44 @@ func initProject(c blog.ConfigFileParams, scan bool) error {
 	return nil
 }
 
+func newFileWizard(defaults blog.BlogFileContents, edit bool) (blog.BlogFileContents, bool, error) {
+	var params blog.BlogFileContents = defaults
+	var tagStr = ""
 
-func newFile(b blog.BlogFileContents, filenameOverride string, edit bool) error {
+	rl, err := readline.New("")
+	if err != nil {
+		return params, edit, err
+	}
+	defer rl.Close()
+
+
+	fmt.Printf("Creating a new blog entry...\n")
+
+	if err := wizardPromptString(rl, "Title of blog entry", params.Title, &params.Title); err != nil {
+		return params, edit, err
+	}
+
+	if err := wizardPromptString(rl, "Description of blog entry", params.Desc, &params.Desc); err != nil {
+		return params, edit, err
+	}
+
+	if err := wizardPromptString(rl, "Tags for blog (comma separated list)", params.Tags.String(), &tagStr); err != nil {
+		return params, edit, err
+	} else {
+		params.Tags = util.SplitCommaList(tagStr)
+	}
+
+	if err := wizardPromptBool(rl, "Edit file now?", edit, &edit); err != nil {
+		return params, edit, err
+	} else {
+		params.Tags = util.SplitCommaList(tagStr)
+	}
+
+	return params, edit, nil
+}
+
+
+func newFile(b blog.BlogFileContents, filenameOverride string, edit bool, wizard bool) error {
 	if !projectFileExists() {
 		return ErrProjectDoesNotExist
 	}
@@ -405,18 +588,20 @@ func newFile(b blog.BlogFileContents, filenameOverride string, edit bool) error 
 		return err
 	}
 
+	if wizard {
+		b, edit, err = newFileWizard(b, edit)
+		if err != nil {
+		return err
+		}
+	}
+
 	path, err = state.NewFile(b, filenameOverride)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Created file: %v\n", path)
-
-	if edit {
-		editFile(path)
-	}
-
-	fmt.Printf("Scanning for changes in %v\n", path)
+	fmt.Printf("Scanning for changes...\n")
 
 	ul, err := state.Scan()
 	if err != nil {
@@ -428,6 +613,10 @@ func newFile(b blog.BlogFileContents, filenameOverride string, edit bool) error 
 	err = state.WriteConfig()
 	if err != nil {
 		return err
+	}
+
+	if edit {
+		editFile(path)
 	}
 
 	return nil
@@ -521,6 +710,8 @@ func editFile(filename string) error {
 		return err
 	}
 
+	fmt.Printf("Editing file: %v\n", filename)
+
 	editor, ok := os.LookupEnv(constants.AppEnvironmentVarPrefix + "EDITOR")
 
 	if !ok {
@@ -547,6 +738,7 @@ func editFile(filename string) error {
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
+
 	err = cmd.Run()
 
 	if err != nil {

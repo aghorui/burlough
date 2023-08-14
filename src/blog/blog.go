@@ -11,6 +11,7 @@ import (
 type MetadataType int
 
 const (
+	Invalid MetadataType = -1
 	TOML MetadataType = 0
 	YAML MetadataType = 1
 )
@@ -27,7 +28,7 @@ func (t Tags) String() string {
 type BlogFileContents struct {
 	Title string `yaml:"title"`
 	Desc string `yaml:"desc"`
-	Tags []string `yaml:"tags"`
+	Tags Tags `yaml:"tags"`
 	Content template.HTML
 }
 
@@ -69,7 +70,7 @@ type BlogFile struct {
 type ConfigFileParams struct {
 	Title string                        `json:"title"`                // Title of the blog
 	Desc string                         `json:"description"`          // Short description of the blog. Goes in the <meta> tags.
-	Tags []string                       `json:"tags"`                 // Tags for the blog. Goes in the <meta> tags.
+	Tags Tags                           `json:"tags"`                 // Tags for the blog. Goes in the <meta> tags.
 	BlogURLPathPrefix string            `json:"blog_url_path_prefix"` // NOT IMPLEMENTED This prefix will be added to all in-site URLs that are generated.
 	RenderPath string                   `json:"renderpath"`           // Path to where the rendered files should be put.
 	TemplatePath string                 `json:"templatepath"`         // Path to template.

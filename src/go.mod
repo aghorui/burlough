@@ -7,6 +7,7 @@ require github.com/yuin/goldmark v1.5.4
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/alecthomas/chroma/v2 v2.2.0 // indirect
+	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/otiai10/copy v1.12.0 // indirect

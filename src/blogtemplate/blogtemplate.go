@@ -112,10 +112,10 @@ var DefaultBlogTemplate BlogTemplate = func() BlogTemplate {
 	dir := GetDefaultExportTemplateFS()
 
 	return BlogTemplate{
-		TemplateFS:  &dir,
-		FrontPage: template.Must(template.New("front_page.html").ParseFS(GetDefaultExportTemplateFS(), "front_page.html")),
-		BlogPage:  template.Must(template.New("blog_page.html").ParseFS(GetDefaultExportTemplateFS(), "blog_page.html")),
-		IndexPage: template.Must(template.New("blog_list.html").ParseFS(GetDefaultExportTemplateFS(), "blog_list.html")),
+		TemplateFS: &dir,
+		FrontPage:  template.Must(template.New("front_page.html").ParseFS(GetDefaultExportTemplateFS(), "front_page.html")),
+		BlogPage:   template.Must(template.New("blog_page.html").ParseFS(GetDefaultExportTemplateFS(), "blog_page.html")),
+		IndexPage:  template.Must(template.New("blog_list.html").ParseFS(GetDefaultExportTemplateFS(), "blog_list.html")),
 	}
 }()
 

@@ -19,9 +19,30 @@ func TestTagFunctions(t *testing.T) {
 		"should match expected output")
 
 	assert.Equal(t,
+		TagsToStringTOML(blog.Tags([]string{})),
+		template.HTML("[]"),
+		"should match expected output")
+
+	assert.Equal(t,
+		TagsToStringTOML(blog.Tags(nil)),
+		template.HTML("[]"),
+		"should match expected output")
+
+	assert.Equal(t,
 		TagsToStringYAML(blog.Tags([]string{ "a", "1", "2", "\"b"})),
 		template.HTML("[ a, 1, 2, \"b ]"),
 		"should match expected output")
+
+	assert.Equal(t,
+		TagsToStringYAML(blog.Tags([]string{})),
+		template.HTML("[]"),
+		"should match expected output")
+
+	assert.Equal(t,
+		TagsToStringYAML(blog.Tags(nil)),
+		template.HTML("[]"),
+		"should match expected output")
+
 }
 
 func TestWriteBlogFile(t *testing.T) {

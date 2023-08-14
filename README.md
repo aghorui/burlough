@@ -62,7 +62,7 @@ Usage: brlo <subcommand> [arguments]
 The subcommands are:
 
 	init      Initialize a new project in the current directory
-	new       Add a new blog file to the project (untracked by project)
+	new       Add a new blog file to the project
 	config    Show or change a project configuration value
 	scan      Scan and update the project file
 	list      List all tracked files in project
@@ -101,7 +101,7 @@ you use the `new` command:
 brlo new -title="My New Blog Post"
 ```
 
-Note that this does not actually add the file into the blog project.
+Running this command will initiate a scan on the folder.
 
 
 ### Blog Metadata
@@ -135,7 +135,7 @@ YAML:
 ```
 ---
 title: title goes here
-tags: tags, go, here
+tags: [ tags, go, here ]
 desc: description goes here
 ---
 
@@ -149,8 +149,9 @@ Configuration section below for details on configuring your project.
 
 ### Adding Files to the Blog
 
-Burlough will scan for blog files in the project directory and add them to the
-project on using the `scan` command:
+Burlough will scan for blog files that were added, removed, or updated in the
+project directory and add them to the project on using the `scan` command if
+they are new:
 
 ```
 brlo scan
@@ -161,6 +162,15 @@ To see the files that are currently being tracked by the project, use the
 
 ```
 brlo list
+```
+
+### Updating Files
+
+Burlough will update timestamps or remove deleted files from tracking on running
+the scan command:
+
+```
+brlo scan
 ```
 
 ### Rendering/Exporting the Blog
@@ -254,6 +264,7 @@ Goldmark-Highlighting https://pkg.go.dev/github.com/yuin/goldmark-highlighting
 Goldmark-Frontmatter  https://pkg.go.dev/go.abhg.dev/goldmark/frontmatter
 Copy                  https://pkg.go.dev/github.com/otiai10/copy
 Testify               https://pkg.go.dev/github.com/stretchr/testify
+Readline              https://pkg.go.dev/github.com/chzyer/readline
 ```
 
 ## License

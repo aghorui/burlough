@@ -41,6 +41,10 @@ func TagsToStringTOML(t blog.Tags) template.HTML {
 	var b strings.Builder
 	var l int = 0
 
+	if len(t) == 0 {
+		return "[]"
+	}
+
 	for _, v := range t {
 		l += len(v) + 4 // 2 quotes + comma + space
 	}
@@ -65,13 +69,16 @@ func TagsToStringTOML(t blog.Tags) template.HTML {
 
 // Converts a blog tagset to a YAML parseable string array
 func TagsToStringYAML(t blog.Tags) template.HTML {
-	return "[ " + template.HTML(strings.Join(t, ", ")) + " ]"
+	if len(t) == 0 {
+		return "[]"
+	} else {
+		return "[ " + template.HTML(strings.Join(t, ", ")) + " ]"
+	}
 }
 
 var BlogTemplateNone = template.Must(template.New("none.md").Parse(string(BlogTemplateNoneData)))
 
-var BlogTemplateTOML = template.Must(
-	template.New("toml.md").Funcs(
+var BlogTemplateTOML = template.Must(template.New("toml.md").Funcs(
 		template.FuncMap{
 			"tagsToString": TagsToStringTOML,
 		}).Parse(string(BlogTemplateTOMLData)))
