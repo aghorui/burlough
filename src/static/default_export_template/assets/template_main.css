@@ -13,21 +13,75 @@ a {
 	text-decoration: none;
 }
 
+code {
+	background-color: #eeeeee;
+	padding: 2px;
+	border-radius: 2px;
+}
+
+pre {
+	border-radius: 3px;
+	border: 1px solid grey;
+	padding: 5px;
+	margin: 5px;
+	background: #eeeeee !important;
+}
+
+pre code {
+	background-color: transparent;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table tr td {
+	border: 1px solid grey;
+	padding: 5px;
+}
+
+table tr:nth-of-type(even) {
+	background-color: #cccccc;
+}
+
+table tr:nth-of-type(odd) {
+	background-color: #bbbbbb;
+}
+
+table tr th {
+	border: 1px solid grey;
+	font-weight: bold;
+	padding: 5px;
+	background-color: #eeeeee;
+	text-align:center;
+}
+
+blockquote {
+	border-left: 2px solid #dddddd;
+	padding-left: 20px;
+	color: grey;
+	font-style: italic;
+}
+
 .container {
 	max-width: 800px;
 	margin: auto;
-	line-height: 1.8;
 	text-align: justify;
 	font-weight: 200;
 	font-family: Calibri, Noto Sans, Sans-Serif;
 	padding: 10px;
 }
 
+.article-header {
+	margin-bottom: 50px;
+}
+
 .footer {
 	text-align: right;
 	font-size: small;
 	color: grey;
-	margin-top: 30px;
+	margin-top: 50px;
+	padding: 5px;
 }
 
 .headerlinks {

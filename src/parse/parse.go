@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"html/template"
 
-	"github.com/aghorui/burlough/util"
 	"github.com/aghorui/burlough/blog"
+	"github.com/aghorui/burlough/util"
 
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
+	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 	"go.abhg.dev/goldmark/frontmatter"
 )
 
@@ -26,8 +28,15 @@ func ParseBlogFile(src []byte) (blog.BlogFileContents, bool, error) {
 			&frontmatter.Extender{},
 			highlighting.NewHighlighting(
 				highlighting.WithStyle("tango"),
+				highlighting.WithFormatOptions(
+					chromahtml.WithLineNumbers(true),
+					chromahtml.LinkableLineNumbers(true, "ln_"),
+				),
 			),
 			extension.GFM,
+		),
+		goldmark.WithRendererOptions(
+			html.WithUnsafe(),
 		),
 	)
 

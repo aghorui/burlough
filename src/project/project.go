@@ -401,11 +401,16 @@ func (state ProjectState) WriteConfig() error {
 	return nil
 }
 
-func sanitizeString(s string) string {
+func sanitizeString(s string, prefixTime bool) string {
 	sl := strings.Join(strings.Fields(s), DefaultWhitespaceReplacement)
 	sanitized := strings.ToLower(string(util.SanitizeRegex.ReplaceAll([]byte(sl), []byte(""))))
-	timePrefix := time.Now().Format("20060102")
-	return timePrefix + DefaultWhitespaceReplacement + sanitized
+
+	if prefixTime {
+		timePrefix := time.Now().Format("20060102")
+		return timePrefix + DefaultWhitespaceReplacement + sanitized
+	} else {
+		return sanitized
+	}
 }
 
 func (state ProjectState) NewFile(b blog.BlogFileContents, filenameOverride string) (string, error) {
@@ -429,14 +434,17 @@ func (state ProjectState) NewFile(b blog.BlogFileContents, filenameOverride stri
 	}
 
 	var filename string
+	var prefixTime bool
 
 	if filenameOverride == "" {
 		filename = b.Title
+		prefixTime = true
 	} else {
 		filename = filenameOverride
+		prefixTime = false
 	}
 
-	filePath := filepath.Join(state.BasePath, sanitizeString(filename) + DefaultBlogFileExtension)
+	filePath := filepath.Join(state.BasePath, sanitizeString(filename, prefixTime) + DefaultBlogFileExtension)
 
 	_, err = os.Stat(filePath)
 

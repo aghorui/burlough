@@ -156,6 +156,12 @@ type BlogTemplateEntry struct {
 }
 
 func PrepareBlogTemplateEntry(b blog.BlogFile, finalPath string, globalDesc string, globalTags blog.Tags) BlogTemplateEntry {
+	var finalUpdated string = ""
+
+	if !b.Updated.IsZero() {
+		finalUpdated = util.GetStandardTimestampString(b.Updated)
+	}
+
 	return BlogTemplateEntry{
 		Title: b.Title,
 		Desc: b.Desc,
@@ -163,7 +169,7 @@ func PrepareBlogTemplateEntry(b blog.BlogFile, finalPath string, globalDesc stri
 		Tags: b.Tags,
 		GlobalTags: globalTags,
 		Created: util.GetStandardTimestampString(b.Created),
-		Updated: util.GetStandardTimestampString(b.Updated),
+		Updated: finalUpdated,
 		URL: filepath.Join("./", finalPath),
 		Content: b.Content,
 	}

@@ -1,0 +1,39 @@
+{
+	"title": "Burlough Example Blog",
+	"description": "This an example blog for showing what a Burlough Blog looks like.",
+	"tags": [
+		"burlough",
+		"golang",
+		"html",
+		"css",
+		"js",
+		"blog",
+		"website",
+		"static website generator"
+	],
+	"blog_url_path_prefix": "",
+	"renderpath": "../blogfiles",
+	"templatepath": "",
+	"use_file_timestamp_as_creation_date": true,
+	"metadata_type": 0,
+	"files": [
+		{
+			"path": "README.md",
+			"hash": "0c7311d4daa459ae88028948ab8f79f239f88b8b",
+			"updated": "0001-01-01T00:00:00Z",
+			"created": "2023-08-15T17:01:36.483282576Z"
+		},
+		{
+			"path": "fungible-proactive-client-acquisition-strategy.md",
+			"hash": "797627f8b40d8da2f1b0d85271cda027f4c5d405",
+			"updated": "0001-01-01T00:00:00Z",
+			"created": "2023-08-15T16:53:28.876387479Z"
+		},
+		{
+			"path": "markdown-test.md",
+			"hash": "bd1f9670d984a9d8d4a76af017ec72bd9bf77cc7",
+			"updated": "0001-01-01T00:00:00Z",
+			"created": "2023-08-15T10:55:06.455262341Z"
+		}
+	]
+}

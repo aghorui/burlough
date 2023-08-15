@@ -17,8 +17,15 @@
 			<a href="index.html">Home</a>
 			<a href="blog_index.html">Index</a>
 		</div>
+	</div>
+
+	<div class="article-header">
 		<h1 class="title">{{.Title}}</h1>
-		<i class="created">{{.Created}}</i> <i class="updated">{{.Updated}}</i>
+		<i class="created">{{.Created}}</i>
+		{{if .Updated }}
+			<i class="updated">Updated {{.Updated}}</i>
+		{{end}}
+		<hr />
 	</div>
 
 	<div class="body">
