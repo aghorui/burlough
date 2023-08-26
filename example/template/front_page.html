@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta name="description" content="{{.Desc}} {{.GlobalDesc}}">
-	<meta name="keywords" content="{{.Tags}} {{.GlobalTags}}">
+	<meta name="description" content="{{.Desc}}">
+	<meta name="keywords" content="{{.Tags}}">
 	<meta charset="UTF-8" />
 	<title>{{.Title}}</title>
 	<link rel="icon" type="image/x-icon" href="./assets/template_icon.svg" />
@@ -14,25 +14,29 @@
 <div class="container">
 	<div class="header">
 		<div class="headerlinks">
-			<a href="index.html">Home</a>
 			<a href="blog_index.html">Index</a>
 		</div>
-	</div>
-
-	<div class="article-header">
 		<h1 class="title">{{.Title}}</h1>
-		<i class="created">{{.Created}}, </i>
-		{{if .Updated }}
-			<i class="updated">Updated {{.Updated}}</i>
-		{{end}}
 		<hr />
 	</div>
 
 	<div class="body">
-{{.Content}}
+	<p>
+		{{.Desc}}
+	</p>
+	<h2>Recent Posts</h2>
+	{{range $index, $file := getBlogFirst .Entries 3}}
+		<div class="post_entry">
+			<a href="{{$file.URL}}">{{$file.Title}}</a>
+			{{if $file.Desc}}
+				: {{$file.Desc}}
+			{{end}}
+		</div>
+	{{end}}
 	</div>
 
 	<div class="footer">
+		<hr />
 		Blog generated with <a href="https://github.com/aghorui/burlough">Burlough</a>.
 	</div>
 </div>

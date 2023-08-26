@@ -632,6 +632,8 @@ func printUpdateLog(u []project.UpdateLog) {
 			fmt.Printf("Updated: ")
 		case project.Deleted:
 			fmt.Printf("Deleted: ")
+		case project.NoChange:
+			fmt.Printf("Same: ")
 		default:
 			panic(util.Error(fmt.Errorf("BUG: Found invalid Update Mode: %v", l.UpdateMode)))
 		}

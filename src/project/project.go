@@ -121,9 +121,10 @@ type UpdateMode int
 
 // Enum for UpdateLog
 const (
-	Created UpdateMode = 0
-	Updated UpdateMode = 1
-	Deleted UpdateMode = 2
+	Created  UpdateMode = 0
+	Updated  UpdateMode = 1
+	Deleted  UpdateMode = 2
+	NoChange UpdateMode = 3
 )
 
 // Store Update/Create/Delete information between old and new
@@ -136,9 +137,10 @@ type UpdateLog struct {
 // Kind of looks like reinventing git.
 func updateBlogMetadata(old []blog.BlogMetadata, new []blog.BlogMetadata, newMetaMap MetadataMap) []UpdateLog {
 	// 3 cases
-	// old exists -> new doesn't exist : delete
-	// old doesn't exist -> new exists : add
-	// old exists -> new exists        : update
+	// old exists -> new doesn't exist     : delete
+	// old doesn't exist -> new exists     : add
+	// old exists -> new exists            : update
+	// old exists -> new exists -> is same : no change
 
 	updateLog := make([]UpdateLog, 0, len(new))
 
@@ -157,6 +159,10 @@ func updateBlogMetadata(old []blog.BlogMetadata, new []blog.BlogMetadata, newMet
 			if new[v].Hash != blogMetadata.Hash {
 				updateLog = append(updateLog, UpdateLog{ Updated, blogMetadata.Path })
 				new[v].Updated = new[v].Created
+			} else {
+				// Otherwise we just carry over the prev updated timestamp
+				updateLog = append(updateLog, UpdateLog{ NoChange, blogMetadata.Path })
+				new[v].Updated = blogMetadata.Updated
 			}
 
 			// And we carry over the old created timestamp.

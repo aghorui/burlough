@@ -246,13 +246,16 @@ config parameter:
 brlo config set -templatepath="path/to/template"
 ```
 
+## Example
+
+An example is available in the [examples](./examples/) folder of this
+repository. You can also find an example of Burlough being used on my personal
+website: [aghorui.github.io](https://aghorui.github.io).
+
 
 ## Todo
 
-* Tests are incomplete. Rewrite tests and write new tests.
-* Return values of different subcommands may be incorrect.
-* Render should implicitly run scan for new files?
-* Complete Documentation
+* Complete/Update Documentation
 
 ## Acknowledgements
 

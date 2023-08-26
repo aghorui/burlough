@@ -21,9 +21,9 @@
 
 	<div class="article-header">
 		<h1 class="title">{{.Title}}</h1>
-		<i class="created">{{.Created}}, </i>
+		<i class="created">{{.Created}}</i>
 		{{if .Updated }}
-			<i class="updated">Updated {{.Updated}}</i>
+			<i class="updated">, Updated {{.Updated}}</i>
 		{{end}}
 		<hr />
 	</div>
@@ -33,6 +33,7 @@
 	</div>
 
 	<div class="footer">
+		<hr />
 		Blog generated with <a href="https://github.com/aghorui/burlough">Burlough</a>.
 	</div>
 </div>

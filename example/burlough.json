@@ -2,18 +2,11 @@
 	"title": "Burlough Example Blog",
 	"description": "This an example blog for showing what a Burlough Blog looks like.",
 	"tags": [
-		"burlough",
-		"golang",
-		"html",
-		"css",
-		"js",
-		"blog",
-		"website",
-		"static website generator"
+		"CHANGEME"
 	],
 	"blog_url_path_prefix": "",
 	"renderpath": "../blogfiles",
-	"templatepath": "",
+	"templatepath": "./template",
 	"use_file_timestamp_as_creation_date": true,
 	"metadata_type": 0,
 	"files": [

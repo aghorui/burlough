@@ -55,6 +55,18 @@ func (b BlogTemplate) CopyAssetsToFolder(dest string) error {
 	return nil
 }
 
+func GetBlogFirst(entries []BlogTemplateEntry, numEntries int) []BlogTemplateEntry {
+	if numEntries >= len(entries) {
+		return entries
+	} else {
+		return entries[0:numEntries - 1]
+	}
+}
+
+var defaultFuncMap template.FuncMap = template.FuncMap{
+	"getBlogFirst": GetBlogFirst,
+};
+
 // Loads a template into a struct
 func LoadTemplate(folder fs.FS) (BlogTemplate, error) {
 	var t BlogTemplate
@@ -66,17 +78,17 @@ func LoadTemplate(folder fs.FS) (BlogTemplate, error) {
 		return t, util.Error(err)
 	}
 
-	t.FrontPage, err = template.New(FrontPageTemplateFileName).ParseFS(folder, FrontPageTemplateFileName)
+	t.FrontPage, err = template.New(FrontPageTemplateFileName).Funcs(defaultFuncMap).ParseFS(folder, FrontPageTemplateFileName)
 	if err != nil {
 		return t, util.Error(err)
 	}
 
-	t.BlogPage, err = template.New(BlogPageTemplateFileName).ParseFS(folder, BlogPageTemplateFileName)
+	t.BlogPage, err = template.New(BlogPageTemplateFileName).Funcs(defaultFuncMap).ParseFS(folder, BlogPageTemplateFileName)
 	if err != nil {
 		return t, util.Error(err)
 	}
 
-	t.IndexPage, err = template.New(IndexPageTemplateFileName).ParseFS(folder, IndexPageTemplateFileName)
+	t.IndexPage, err = template.New(IndexPageTemplateFileName).Funcs(defaultFuncMap).ParseFS(folder, IndexPageTemplateFileName)
 	if err != nil {
 		return t, util.Error(err)
 	}
@@ -113,9 +125,9 @@ var DefaultBlogTemplate BlogTemplate = func() BlogTemplate {
 
 	return BlogTemplate{
 		TemplateFS: &dir,
-		FrontPage:  template.Must(template.New("front_page.html").ParseFS(GetDefaultExportTemplateFS(), "front_page.html")),
-		BlogPage:   template.Must(template.New("blog_page.html").ParseFS(GetDefaultExportTemplateFS(), "blog_page.html")),
-		IndexPage:  template.Must(template.New("blog_list.html").ParseFS(GetDefaultExportTemplateFS(), "blog_list.html")),
+		FrontPage:  template.Must(template.New("front_page.html").Funcs(defaultFuncMap).ParseFS(GetDefaultExportTemplateFS(), "front_page.html")),
+		BlogPage:   template.Must(template.New("blog_page.html").Funcs(defaultFuncMap).ParseFS(GetDefaultExportTemplateFS(), "blog_page.html")),
+		IndexPage:  template.Must(template.New("blog_list.html").Funcs(defaultFuncMap).ParseFS(GetDefaultExportTemplateFS(), "blog_list.html")),
 	}
 }()
 
