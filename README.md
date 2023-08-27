@@ -1,4 +1,9 @@
 <img src="./doc/logo.svg" alt="Burlough" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./doc/logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="./doc/logo.svg">
+  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="./doc/logo.svg">
+</picture>
 
 <!---------------------------------
  ___          _               _
